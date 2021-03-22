@@ -44,7 +44,6 @@ public class AuthCheckHandshakeInterceptor implements HandshakeInterceptor {
         if (id == null || id.length() == 0) {
             // 检查失败
             log.debug("check fail - id is null");
-            setResponse((HttpServletResponse) serverHttpResponse, 18001, "param id not found");
             return false;
         }
         boolean contains = deviceManager.contains(id);
@@ -77,7 +76,11 @@ public class AuthCheckHandshakeInterceptor implements HandshakeInterceptor {
     private static Map<String, String> splitQuery(URI uri) {
         Map<String, String> queryPairs = new LinkedHashMap<>();
         String query = uri.getQuery();
+        if (query == null) {
+            return queryPairs;
+        }
         String[] pairs = query.split("&");
+
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
             try {
