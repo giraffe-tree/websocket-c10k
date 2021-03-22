@@ -1,0 +1,4 @@
+server:
+  port: 8010
+  tomcat:
+    max-connections: 1010000
