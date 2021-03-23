@@ -1,5 +1,7 @@
 package me.giraffetree.websocket.c10k.websocket;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import me.giraffetree.websocket.c10k.websocket.base.impl.ConnectionInfo;
 import me.giraffetree.websocket.c10k.websocket.base.IDeviceManager;
@@ -8,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
@@ -64,6 +68,17 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         log.info("connection close - id:{}", connectionInfo.getId());
     }
 
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String payload = message.getPayload();
+        JSONObject jsonObject = JSON.parseObject(payload);
+        String cmd = jsonObject.getString("cmd");
+        if ("ping".equals(cmd)) {
+            String seq = jsonObject.getString("seq");
+            session.sendMessage(new TextMessage("{\"seq\":\"" + seq + "\",\"cmd\":\"pong\"}"));
+            deviceManager.updateExpiredTime(session.getId());
+        }
+    }
 
     @Override
     public void destroy() {

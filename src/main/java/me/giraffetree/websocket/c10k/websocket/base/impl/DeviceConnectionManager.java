@@ -40,7 +40,7 @@ public class DeviceConnectionManager implements IDeviceManager {
 
     @Override
     @Scheduled(cron = CHECK_DISCONNECTED_SESSION_CRON)
-    public synchronized void checkExpiredConnection() {
+    public void checkExpiredConnection() {
         List<ConnectionInfo> connectionInfoList = getExpiredConnection(1024);
         if (connectionInfoList.isEmpty()) {
             return;
@@ -51,9 +51,15 @@ public class DeviceConnectionManager implements IDeviceManager {
             String sessionId = session.getId();
             String subSessionId = sessionId.substring(sessionId.length() - 4);
             try {
-                log.info("try to close expired connection - id:{} sessionId:{}", connectionInfo.getId(), subSessionId);
-                session.close(CloseStatus.SESSION_NOT_RELIABLE);
-                successSize++;
+                if (session.isOpen()) {
+                    synchronized (session) {
+                        if (session.isOpen()) {
+                            log.debug("try to close expired connection - id:{} sessionId:{}", connectionInfo.getId(), subSessionId);
+                            session.close(CloseStatus.SESSION_NOT_RELIABLE);
+                            successSize++;
+                        }
+                    }
+                }
             } catch (IOException e) {
                 log.warn("expired session close error - id:{} msg:{} id:{} ",
                         connectionInfo.getId(), e.getLocalizedMessage(), subSessionId);
@@ -63,7 +69,7 @@ public class DeviceConnectionManager implements IDeviceManager {
         log.info("check expired connection - expired:{} successClose:{}", size, successSize);
     }
 
-    public synchronized  List<ConnectionInfo> getExpiredConnection(int max) {
+    public synchronized List<ConnectionInfo> getExpiredConnection(int max) {
         return connectionManager.getExpiredConnection(max);
     }
 
@@ -125,7 +131,6 @@ public class DeviceConnectionManager implements IDeviceManager {
         }
         return connectionInfo;
     }
-
 
 
     @Override
