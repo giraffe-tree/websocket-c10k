@@ -46,6 +46,7 @@ public class DeviceConnectionManager implements IDeviceManager {
             return;
         }
         int successSize = 0;
+        long l1 = System.currentTimeMillis();
         for (ConnectionInfo connectionInfo : connectionInfoList) {
             WebSocketSession session = connectionInfo.getSession();
             String sessionId = session.getId();
@@ -65,8 +66,9 @@ public class DeviceConnectionManager implements IDeviceManager {
                         connectionInfo.getId(), e.getLocalizedMessage(), subSessionId);
             }
         }
+        long l2 = System.currentTimeMillis();
         int size = connectionInfoList.size();
-        log.info("check expired connection - expired:{} successClose:{}", size, successSize);
+        log.info("check expired connection - expired:{} successClose:{} cost:{}ms", size, successSize, l2 - l1);
     }
 
     public synchronized List<ConnectionInfo> getExpiredConnection(int max) {
