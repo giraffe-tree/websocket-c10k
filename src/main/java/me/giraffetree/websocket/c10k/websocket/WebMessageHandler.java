@@ -75,7 +75,8 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         String cmd = jsonObject.getString("cmd");
         if ("ping".equals(cmd)) {
             String seq = jsonObject.getString("seq");
-            session.sendMessage(new TextMessage("{\"seq\":\"" + seq + "\",\"cmd\":\"pong\"}"));
+            // {"seq":"","cmd":"ping","response":{"code":200}}
+            session.sendMessage(new TextMessage("{\"seq\":\"" + seq + "\",\"cmd\":\"pong\",\"response\":{\"code\":200}}"));
             deviceManager.updateExpiredTime(session.getId());
         }
     }
