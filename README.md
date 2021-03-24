@@ -16,6 +16,11 @@
 
 ### 第一次测试
 
+```
+mvn clean package -DskipTests
+java -jar target/c10k-0.0.1.jar
+```
+
 在浏览器中
 
 ```
@@ -48,12 +53,19 @@ ws = new WebSocket("ws://localhost:8010/websocket/handshake?id=01")
             - 这里我使用 arthas 进行监控
             - 从连接数0 到 连接数20000 的过程中一共发生 3 次年轻代GC , 总计 1203ms
             - 虽然没有发生 full gc 但这个时间我仍然无法忍受
+    - 30000 连接
+        - 维护心跳时 90% ~ 100%
+    - 检查维护心跳带来开销, 去掉检查过期心跳, 已经更新维护心跳的数据结构
+        - 30000 连接
+            - 等待连接全部建立后, cpu 占用 90%~100%
+    - 继续检查心跳, 但客户端心跳的发送间隔改为 5秒
+        - 30000 连接
+            - 等待连接全部建立后, cpu 占用 50% 左右
 - `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseG1GC -jar target/c10k-0.0.1.jar`
     - 这里我使用了 g1gc 想要减少 gc 中 stop the world 等待时间
     - 20000 连接
         - 从连接数0 到 连接数20000 的过程中一共发生 9 次 young gc , 共计 1563ms
             - 虽然单次 gc 的平均时长比之前短, 但是总时长还增加了 
-
 
 
 

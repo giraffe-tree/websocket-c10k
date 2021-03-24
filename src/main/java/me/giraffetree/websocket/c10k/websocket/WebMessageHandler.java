@@ -37,6 +37,8 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
 
     private final IDeviceManager deviceManager;
 
+    private final TextMessage PONG = new TextMessage("{\"seq\":\"0\",\"cmd\":\"pong\",\"response\":{\"code\":200}}");
+
     @Autowired
     public WebMessageHandler(IDeviceManager deviceManager) {
         this.deviceManager = deviceManager;
@@ -74,9 +76,8 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         JSONObject jsonObject = JSON.parseObject(payload);
         String cmd = jsonObject.getString("cmd");
         if ("ping".equals(cmd)) {
-            String seq = jsonObject.getString("seq");
-            // {"seq":"","cmd":"ping","response":{"code":200}}
-            session.sendMessage(new TextMessage("{\"seq\":\"" + seq + "\",\"cmd\":\"pong\",\"response\":{\"code\":200}}"));
+            // {"seq":"0","cmd":"pong","response":{"code":200}}
+            session.sendMessage(PONG);
             deviceManager.updateExpiredTime(session.getId());
         }
     }
