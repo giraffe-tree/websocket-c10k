@@ -3,20 +3,20 @@ package me.giraffetree.websocket.c10k.websocket;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import me.giraffetree.websocket.c10k.websocket.base.impl.ConnectionInfo;
 import me.giraffetree.websocket.c10k.websocket.base.IDeviceManager;
+import me.giraffetree.websocket.c10k.websocket.base.impl.ConnectionInfo;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import java.util.Map;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * @author GiraffeTree
@@ -39,6 +39,8 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
 
     private final TextMessage PONG = new TextMessage("{\"seq\":\"0\",\"cmd\":\"pong\",\"response\":{\"code\":200}}");
 
+    private final LongAdder longAdder = new LongAdder();
+
     @Autowired
     public WebMessageHandler(IDeviceManager deviceManager) {
         this.deviceManager = deviceManager;
@@ -55,7 +57,11 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         ConcurrentWebSocketSessionDecorator concurrentWebSocketSessionDecorator = new ConcurrentWebSocketSessionDecorator(
                 session, DEFAULT_WEBSOCKET_SEND_TIME_LIMIT_MILLS, DEFAULT_WEBSOCKET_BUFFER_SIZE_LIMIT_MILLS);
         deviceManager.addConnectionInfo(id, concurrentWebSocketSessionDecorator);
-        log.info("connection add - id:{}", id);
+        longAdder.increment();
+        long cur = longAdder.longValue();
+        if (cur % 100L == 0L) {
+            log.info("connection add - id:{} size:{}", id,cur);
+        }
     }
 
 
@@ -67,7 +73,11 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
             log.info("connection info not found and close - {}", sessionId);
             return;
         }
-        log.info("connection close - id:{}", connectionInfo.getId());
+        longAdder.decrement();
+        long cur = longAdder.longValue();
+        if (cur % 100L == 0L) {
+            log.info("connection close - id:{} size:{}", connectionInfo.getId(),cur);
+        }
     }
 
     @Override
