@@ -37,6 +37,9 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
 
     private final IDeviceManager deviceManager;
 
+    /**
+     * {"seq":"0","cmd":"pong","response":{"code":200}}
+     */
     private final TextMessage PONG = new TextMessage("{\"seq\":\"0\",\"cmd\":\"pong\",\"response\":{\"code\":200}}");
 
     private final LongAdder longAdder = new LongAdder();
@@ -60,7 +63,7 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         longAdder.increment();
         long cur = longAdder.longValue();
         if (cur % 100L == 0L) {
-            log.info("connection add - id:{} size:{}", id,cur);
+            log.info("connection add - id:{} size:{}", id, cur);
         }
     }
 
@@ -76,7 +79,7 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         longAdder.decrement();
         long cur = longAdder.longValue();
         if (cur % 100L == 0L) {
-            log.info("connection close - id:{} size:{}", connectionInfo.getId(),cur);
+            log.info("connection close - id:{} size:{}", connectionInfo.getId(), cur);
         }
     }
 
@@ -86,8 +89,11 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         JSONObject jsonObject = JSON.parseObject(payload);
         String cmd = jsonObject.getString("cmd");
         if ("ping".equals(cmd)) {
-            // {"seq":"0","cmd":"pong","response":{"code":200}}
-            session.sendMessage(PONG);
+            synchronized (session) {
+                if (session.isOpen()) {
+                    session.sendMessage(PONG);
+                }
+            }
             deviceManager.updateExpiredTime(session.getId());
         }
     }
