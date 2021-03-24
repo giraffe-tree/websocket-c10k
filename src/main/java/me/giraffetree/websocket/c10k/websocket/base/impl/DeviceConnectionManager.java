@@ -10,8 +10,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 /**
  * @author GiraffeTree
@@ -29,13 +30,15 @@ public class DeviceConnectionManager implements IDeviceManager {
     private final static String CHECK_DISCONNECTED_SESSION_CRON = "*/" + CHECK_DISCONNECTED_SESSION_INTERVAL_SECONDS + " * * * * ?";
 
     private final IConnectionManager<String, ConnectionInfo> connectionManager;
-
-    private final ConcurrentHashMap<String, ConnectionInfo> cacheMap;
+    /**
+     * key: id
+     */
+    private final Map<String, ConnectionInfo> cacheMap;
 
     @Autowired
     public DeviceConnectionManager(IConnectionManager<String, ConnectionInfo> connectionManager) {
         this.connectionManager = connectionManager;
-        this.cacheMap = new ConcurrentHashMap<>(1024);
+        this.cacheMap = new HashMap<>(1024);
     }
 
     @Override

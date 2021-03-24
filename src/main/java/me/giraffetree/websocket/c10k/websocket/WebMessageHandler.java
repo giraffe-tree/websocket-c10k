@@ -42,6 +42,8 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
      */
     private final TextMessage PONG = new TextMessage("{\"seq\":\"0\",\"cmd\":\"pong\",\"response\":{\"code\":200}}");
 
+    private final static String PING_CMD = "ping";
+    private final static String CMD = "cmd";
     private final LongAdder longAdder = new LongAdder();
 
     @Autowired
@@ -63,7 +65,7 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
         longAdder.increment();
         long cur = longAdder.longValue();
         if (cur % 100L == 0L) {
-            log.info("connection add - id:{} size:{}", id, cur);
+            log.info("connection add - id:{} size:{} ip:{}", id, cur, session.getRemoteAddress());
         }
     }
 
@@ -87,8 +89,9 @@ public class WebMessageHandler extends AbstractWebSocketHandler implements Dispo
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
         JSONObject jsonObject = JSON.parseObject(payload);
-        String cmd = jsonObject.getString("cmd");
-        if ("ping".equals(cmd)) {
+        String cmd = jsonObject.getString(CMD);
+
+        if (PING_CMD.equals(cmd)) {
             synchronized (session) {
                 if (session.isOpen()) {
                     session.sendMessage(PONG);
