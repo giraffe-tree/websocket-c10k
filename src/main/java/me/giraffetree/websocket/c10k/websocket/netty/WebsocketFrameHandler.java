@@ -33,18 +33,6 @@ public class WebsocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
     }
 
     @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelRegistered(ctx);
-
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelUnregistered(ctx);
-
-    }
-
-    @Override
     protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
 
         if (msg instanceof TextWebSocketFrame) {

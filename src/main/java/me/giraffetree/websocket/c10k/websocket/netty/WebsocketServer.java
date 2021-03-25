@@ -23,7 +23,6 @@ public class WebsocketServer {
     @SuppressWarnings("AlibabaThreadPoolCreation")
     private final ExecutorService executorService = Executors.newFixedThreadPool(1, r -> {
         Thread t = new Thread(r);
-        t.setDaemon(false);
         t.setName("start-thread-%d");
         return t;
     });
@@ -56,7 +55,10 @@ public class WebsocketServer {
         }
     }
 
+    public static void main(String[] args) throws Exception {
 
+        new WebsocketServer().start(8011);
+    }
     @PostConstruct
     public void startServer() throws Exception {
         executorService.execute(() -> {

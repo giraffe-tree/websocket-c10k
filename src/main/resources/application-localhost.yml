@@ -13,5 +13,5 @@ server:
 
 ws:
   port: 8011
-  path: websocket/handshake
+  path: /websocket/handshake
 
