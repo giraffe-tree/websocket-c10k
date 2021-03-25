@@ -5,8 +5,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
-import me.giraffetree.websocket.c10k.websocket.netty.StompWebSocketChatServer;
-import me.giraffetree.websocket.c10k.websocket.netty.StompWebSocketChatServerInitializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
