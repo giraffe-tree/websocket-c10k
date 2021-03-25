@@ -15,7 +15,3 @@ ws:
   port: 8011
   path: websocket/handshake
 
-logging:
-  level:
-    io:
-      netty: debug

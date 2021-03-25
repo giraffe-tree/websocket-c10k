@@ -57,10 +57,6 @@ public class WebsocketServer {
     }
 
 
-    public static void main(String[] args) throws Exception {
-        new WebsocketServer().start(8010);
-
-    }
     @PostConstruct
     public void startServer() throws Exception {
         executorService.execute(() -> {
