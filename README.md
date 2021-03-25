@@ -76,7 +76,7 @@ ws = new WebSocket("ws://localhost:8010/websocket/handshake?id=01")
     - `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:MetaspaceSize=96M -jar target/c10k-0.0.1.jar`
 - 压测工具
     - 5秒心跳, 不判断 seq
-- 测试 1: 主要优化 tomcat 参数
+- 主要优化 tomcat 参数
     - 代码 tag 0.0.2.1
         - springboot 内置 tomcat 优化
             - `server.tomcat.max-connections: 1010000`
@@ -94,20 +94,27 @@ ws = new WebSocket("ws://localhost:8010/websocket/handshake?id=01")
                - `w.s.h.ExceptionWebSocketHandlerDecorator : Closing session due to exception for StandardWebSocketSession[id=6cd1cf95-6bf6-8a79-9bc2-f44f7af1ac3f, uri=ws://172.16.67.198:8010/websocket/handshake/?id=8312_11790]  java.lang.IllegalStateException: Message will not be sent because the WebSocket session has been closed`
             - 这里我修复下 session close 时还发送消息抛出的异常
                 - https://stackoverflow.com/questions/48319866/websocket-server-based-on-spring-boot-becomes-unresponsive-after-a-malformed-pac
+- 使用 g1gc
     - 测试 tag: 0.0.2.2 发送消息时进行同步, 避免session已经关闭的情况下, 发送消息, 并优化日志打印;
-        - 两台客户端, 每台 30000连接, 共 60000 连接
-            - 60000 个客户端 , 连接成功
-            - 但出现了多次 full gc, 甚至有长达 6 秒的 full GC
-            - `535.208: [Full GC (Ergonomics) [PSYoungGen: 699392K->212554K(1398272K)] [ParOldGen: 4194037K->4194099K(4194304K)] 4893429K->4406653K(5592576K), [Metaspace: 35973K->35973K(1083392K)], 6.0255303 secs] [Times: user=10.68 sys=0.00, real=6.02 secs]`
-        - 使用 G1GC `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -jar target/c10k-0.0.1.jar`   
-            - 还是 60000 个客户端, 没有发生 full gc
-                - 但 young gc 还是很多的, 在连接到 60000 连接时, 大约花了 85 秒, 共 27次young gc, 6415ms
-        - `-XX:MaxGCPauseMillis=80`
-            - `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
-            - 这里测试时我加了最大gc延迟 2个客户端
-            - 26次 young gc 6343ms
-        - 4*30000=12W 个客户端 在 80000 多连接时, 发生 full gc 5.59s
-            - `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
-            - 达到 82000 多个的时候, 一直在 full gc 几乎不能接受新连接
-
+    - 两台客户端, 每台 30000连接, 共 60000 连接
+        - 60000 个客户端 , 连接成功
+        - 但出现了多次 full gc, 甚至有长达 6 秒的 full GC
+        - `535.208: [Full GC (Ergonomics) [PSYoungGen: 699392K->212554K(1398272K)] [ParOldGen: 4194037K->4194099K(4194304K)] 4893429K->4406653K(5592576K), [Metaspace: 35973K->35973K(1083392K)], 6.0255303 secs] [Times: user=10.68 sys=0.00, real=6.02 secs]`
+    - 使用 G1GC `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -jar target/c10k-0.0.1.jar`   
+        - 还是 60000 个客户端, 没有发生 full gc
+            - 但 young gc 还是很多的, 在连接到 60000 连接时, 大约花了 85 秒, 共 27次young gc, 6415ms
+    - `-XX:MaxGCPauseMillis=80`
+        - `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
+        - 这里测试时我加了最大gc延迟 2个客户端
+        - 26次 young gc 6343ms
+    - 4*30000=12W 个客户端 在 80000 多连接时, 发生 full gc 5.59s
+        - `java -Xmx6g -Xms6g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
+        - 达到 82000 多个的时候, 一直在 full gc 几乎不能接受新连接
+- 使用 4核16G的服务器
+    - 将 heap 大小调为 12g
+        -  `java -Xmx12g -Xms12g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
+    - 4*30000=12W 个客户端
+        - 没有发生 full gc
+        - 成功连接上 120000 个客户端
+    - 
 
