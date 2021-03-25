@@ -31,7 +31,7 @@ public class WebsocketServer {
     private Integer port;
 
     @Value("${ws.path}")
-    private String path;
+    private String path = "/websocket/handshake";
 
     public void start(final int port) throws Exception {
         NioEventLoopGroup boosGroup = new NioEventLoopGroup(1);

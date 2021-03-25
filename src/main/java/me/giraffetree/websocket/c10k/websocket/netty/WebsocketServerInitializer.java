@@ -29,7 +29,7 @@ public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel
         ch.pipeline()
                 //因为websocket是基于http，所以要添加http的编码和解码器
                 .addLast(new HttpServerCodec())
-//                .addLast(new ChunkedWriteHandler())
+                .addLast(new ChunkedWriteHandler())
                 //http数据在传输的过程是分段，HttpObjectAggregator可以将多个段聚合
                 //当浏览器发送大量数据时，就会发出多次
                 .addLast(new HttpObjectAggregator(65535))
