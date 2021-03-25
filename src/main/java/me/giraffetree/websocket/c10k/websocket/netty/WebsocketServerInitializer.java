@@ -1,4 +1,4 @@
-package me.giraffetree.websocket.c10k.websocket.netty3;
+package me.giraffetree.websocket.c10k.websocket.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -6,14 +6,22 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import me.giraffetree.websocket.c10k.websocket.netty3.MyWebsocketHandler;
 
 /**
- * Created by 王梦思 on 2020/9/16.
- * <p/>
+ * @author GiraffeTree
+ * @date 2021/3/25 16:12
  */
-public class WebsocketHandlerInitializer extends ChannelInitializer<SocketChannel> {
+public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel> {
+
+    private final String path;
+
+    public WebsocketServerInitializer(String path) {
+        this.path = path;
+    }
+
     @Override
-    protected void initChannel(SocketChannel ch) {
+    protected void initChannel(SocketChannel ch) throws Exception {
         //因为websocket是基于http，所以要添加http的编码和解码器
         ch.pipeline().addLast(new HttpServerCodec());
 
@@ -29,6 +37,12 @@ public class WebsocketHandlerInitializer extends ChannelInitializer<SocketChanne
         // 2，WebSocketServerProtocolHandler核心功能是将http协议升级为ws协议，保持长连接
         ch.pipeline().addLast(new WebSocketServerProtocolHandler("/test"));
         ch.pipeline().addLast(new MyWebsocketHandler());
-        System.out.println("1111");
+//        ch.pipeline()
+//                .addLast(new HttpServerCodec())
+//                .addLast(new HttpObjectAggregator( 65535))
+//                .addLast(new WebSocketServerProtocolHandler(path))
+//        .addLast(new WebsocketFrameHandler())
+//        ;
     }
+
 }

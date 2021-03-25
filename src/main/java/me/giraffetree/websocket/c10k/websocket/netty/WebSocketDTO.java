@@ -1,4 +1,4 @@
-package me.giraffetree.websocket.c10k.websocket.netty2;
+package me.giraffetree.websocket.c10k.websocket.netty;
 
 import lombok.Data;
 

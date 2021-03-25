@@ -1,4 +1,4 @@
-package me.giraffetree.websocket.c10k.websocket.netty2;
+package me.giraffetree.websocket.c10k.websocket.netty;
 
 import com.alibaba.fastjson.JSON;
 import io.netty.channel.ChannelHandlerContext;
@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import org.springframework.web.socket.TextMessage;
 
 /**
  * @author GiraffeTree

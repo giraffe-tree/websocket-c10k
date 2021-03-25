@@ -1,7 +1,6 @@
-package me.giraffetree.websocket.c10k.websocket.netty2;
+package me.giraffetree.websocket.c10k.websocket.netty;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.LongAdder;
 
