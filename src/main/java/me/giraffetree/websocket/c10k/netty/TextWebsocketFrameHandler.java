@@ -7,6 +7,8 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+
 /**
  * @author GiraffeTree
  * @date 2021/3/25 16:37
@@ -51,6 +53,14 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
                 ctx.channel().writeAndFlush(new TextWebSocketFrame(PONG_STRING));
                 break;
             default:
+        }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if (cause instanceof IOException) {
+            log.info("io exception - try to close ctx - {}", cause.getLocalizedMessage());
+            ctx.close();
         }
     }
 }
