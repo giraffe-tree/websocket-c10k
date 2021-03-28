@@ -1,9 +1,11 @@
-package me.giraffetree.websocket.c10k.websocket.netty;
+package me.giraffetree.websocket.c10k.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,14 +33,15 @@ public class WebsocketServer {
     private Integer port;
 
     @Value("${ws.path}")
-    private String path = "/websocket/handshake";
+    private String path = "/websocket/handshake/";
 
     public void start(final int port) throws Exception {
         NioEventLoopGroup boosGroup = new NioEventLoopGroup(1);
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            ServerBootstrap bootstrap = new ServerBootstrap()
-                    .group(boosGroup, workerGroup)
+            ServerBootstrap bootstrap = new ServerBootstrap();
+            bootstrap.handler(new LoggingHandler(LogLevel.INFO));
+            bootstrap.group(boosGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new WebsocketServerInitializer(path));
             bootstrap.bind(port).addListener(

@@ -1,4 +1,4 @@
-package me.giraffetree.websocket.c10k.websocket.netty;
+package me.giraffetree.websocket.c10k.netty;
 
 import lombok.extern.slf4j.Slf4j;
 
