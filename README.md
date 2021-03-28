@@ -117,4 +117,12 @@ ws = new WebSocket("ws://localhost:8010/websocket/handshake?id=01")
         - 没有发生 full gc
         - 成功连接上 120000 个客户端
 
+### 0.0.3
 
+使用 netty 实现
+
+- 第一次测试 0.0.3.1
+    - `java -Xmx12g -Xms12g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
+        - 2台2核4G的客户端, 共计 18w 个 websocket 连接, 都连接成功
+        - 由于使用的是 [go-stress-testing](https://github.com/link1st/go-stress-testing) 在当前内存下的客户端数已经是极限, 故目前只能通过增加服务器(作为 websocket 客户端), 或者使用其他方式实现 websocket client
+-  

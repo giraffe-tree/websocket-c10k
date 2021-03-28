@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 这些 ip 是服务端的ip
+# 这些 ip 是服务端的ip , 需要你手动修改对应到你的服务器地址
 IPS=(
 "172.16.67.210"
 "172.16.67.202"
@@ -23,6 +23,7 @@ COUNT=$2
 NUM=$3
 
 exec_websocket(){
+
     mkdir -p logs
     for i in "${!IPS[@]}"; do
         #./main -c 30000 -n 200 -u ws://172.16.67.200:8010/websocket/handshake/
@@ -34,6 +35,13 @@ exec_end(){
   echo try to end:
   ps -ef | grep main | grep websocket | awk '{print $2 " " $8 " " $14}'
   ps -ef | grep main | grep websocket | awk '{print $2}' | xargs kill -9
+}
+
+exec_ifup(){
+    for i in "${!IPS[@]}"; do
+        echo ifconfig eth0:$i ${IPS[$i]} netmask $NETMASK up
+        ifconfig eth0:$i ${IPS[$i]} netmask $NETMASK up
+    done
 }
 
 case $TYPE in
