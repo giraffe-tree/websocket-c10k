@@ -42,9 +42,7 @@ public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel
                 .handshakeTimeoutMillis(2000L).build();
         WebSocketServerProtocolHandler webSocketServerProtocolHandler = new WebSocketServerProtocolHandler(config);
         pipeline.addLast(webSocketServerProtocolHandler);
-        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
         pipeline.addLast(new TextWebsocketFrameHandler());
-
     }
 
 }

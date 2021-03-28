@@ -15,12 +15,18 @@ public class ConnectionStatisticsManager {
 
     public static void addConnection() {
         longAdder.increment();
-        log.info("add connection - size:{}", longAdder.longValue());
+        long sum = longAdder.longValue();
+        if (sum % 1000L == 0L) {
+            log.info("add connection - size:{}", sum);
+        }
     }
 
     public static void removeConnection() {
         longAdder.decrement();
-        log.info("remove connection - size:{}", longAdder.longValue());
+        long sum = longAdder.longValue();
+        if (sum % 1000L == 0L) {
+            log.info("remove connection - size:{}", sum);
+        }
     }
 
 }

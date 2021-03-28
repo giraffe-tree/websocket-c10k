@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,12 +22,21 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
     private final static String CMD = "cmd";
 
     @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
+            ConnectionStatisticsManager.addConnection();
+        }
+        super.userEventTriggered(ctx, evt);
+    }
+
+    @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         super.handlerAdded(ctx);
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        ConnectionStatisticsManager.removeConnection();
         super.handlerRemoved(ctx);
     }
 
@@ -37,7 +47,7 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
         String cmd = webSocketDTO.getCmd();
         switch (cmd) {
             case PING_CMD:
-                log.info("try to send ping ...");
+                log.debug("try to send ping ...");
                 ctx.channel().writeAndFlush(new TextWebSocketFrame(PONG_STRING));
                 break;
             default:

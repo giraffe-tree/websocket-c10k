@@ -40,7 +40,6 @@ public class WebsocketServer {
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.handler(new LoggingHandler(LogLevel.INFO));
             bootstrap.group(boosGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new WebsocketServerInitializer(path));
@@ -59,14 +58,14 @@ public class WebsocketServer {
     }
 
     public static void main(String[] args) throws Exception {
-
         new WebsocketServer().start(8011);
     }
+
     @PostConstruct
     public void startServer() throws Exception {
         executorService.execute(() -> {
             try {
-               start(port);
+                start(port);
             } catch (Exception e) {
                 e.printStackTrace();
             }
