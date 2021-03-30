@@ -125,4 +125,15 @@ ws = new WebSocket("ws://localhost:8010/websocket/handshake?id=01")
     - `java -Xmx12g -Xms12g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -XX:MetaspaceSize=96M -XX:+UseG1GC -XX:MaxGCPauseMillis=80 -jar target/c10k-0.0.1.jar`
         - 2台2核4G的客户端, 共计 18w 个 websocket 连接, 都连接成功
         - 由于使用的是 [go-stress-testing](https://github.com/link1st/go-stress-testing) 在当前内存下的客户端数已经是极限, 故目前只能通过增加服务器(作为 websocket 客户端), 或者使用其他方式实现 websocket client
--  
+- `java -Xmx3g -Xms3g -cp target/c10k-0.0.1.jar -Dloader.main=me.giraffetree.websocket.c10k.client.ClientStarter org.springframework.boot.loader.PropertiesLauncher --help`
+    - `java -Xmx3g -Xms3g -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -cp target/c10k-0.0.1.jar -Dloader.main=me.giraffetree.websocket.c10k.client.ClientStarter org.springframework.boot.loader.PropertiesLauncher -c 30000 -h 172.16.67.210,172.16.67.202,172.16.67.203,172.16.67.206,172.16.67.207,172.16.67.204,172.16.67.205,172.16.67.208,172.16.67.209,172.16.68.133,172.16.68.134,172.16.68.135,172.16.68.131,172.16.68.132`
+        - 这个命令行是在 2核4G的服务器上执行的 大约到 264000 连接时, 程序卡住了, 原因未知
+        - 打算使用 `nohup {命令} > logs/clients.log 2>&1 &`再启动一次试试
+            - 尝试过程中出现过一些异常, 调整了 jvm 与 tcp 的一些参数
+            - `java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread "main"`
+            - `TCP: too many orphaned sockets`
+        - 调整 jvm 参数后
+            - 连接数增长到 377000 , 然后程序卡死了...
+            - 估计差不多到极限了, 等会儿换台大内存的服务器再试试
+- 
+
