@@ -39,6 +39,9 @@ public class ClientStarter {
     @Parameter(names = "--help", help = true)
     private boolean help;
 
+
+    private volatile boolean closed = false;
+
     public static void main(String[] args) {
         ClientStarter clientStarter = new ClientStarter();
         JCommander jCommander = JCommander.newBuilder()
@@ -61,6 +64,7 @@ public class ClientStarter {
             hosts.add("localhost");
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            closed = true;
             System.out.println("[ close ] try to close all connection... size:" + list.size());
             int c = 0;
             for (WebSocketClient webSocketClient : list) {
@@ -75,6 +79,9 @@ public class ClientStarter {
         }));
 
         for (String host : hosts) {
+            if (closed) {
+                return;
+            }
             int randomPrefix = cur.nextInt(100000);
             String formatPath = String.format("ws://%s:%d%s", host, port, path);
             System.out.printf("[connect] start connect - %s count:%d%n", formatPath, count);
@@ -94,7 +101,7 @@ public class ClientStarter {
             System.out.printf("[connect] success connect - %s %d/%d cost:%dms%n", formatPath, list.size(), count, endConnectMills - startConnectMills);
         }
 
-        for (int i = 1; i <= heartBeatLoop; i++) {
+        for (int i = 1; i <= heartBeatLoop && !closed; i++) {
             System.out.printf("[heartBeat] start heartBeat loop:%d size: %d%n", i, list.size());
             long l1 = System.currentTimeMillis();
             list.forEach(x -> {
