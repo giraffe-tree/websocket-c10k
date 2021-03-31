@@ -1,6 +1,6 @@
-package me.giraffetree.websocket.c10k.websocket.base.impl;
+package me.giraffetree.websocket.c10k.websocket.impl;
 
-import me.giraffetree.websocket.c10k.websocket.base.AbstractConnectionDataManager;
+import me.giraffetree.websocket.c10k.base.AbstractConnectionDataManager;
 import org.springframework.stereotype.Service;
 
 /**

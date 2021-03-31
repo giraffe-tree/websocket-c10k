@@ -1,6 +1,6 @@
-package me.giraffetree.websocket.c10k.websocket.base;
+package me.giraffetree.websocket.c10k.websocket;
 
-import me.giraffetree.websocket.c10k.websocket.base.impl.ConnectionInfo;
+import me.giraffetree.websocket.c10k.websocket.impl.ConnectionInfo;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;

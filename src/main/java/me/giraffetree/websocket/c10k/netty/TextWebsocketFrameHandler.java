@@ -49,7 +49,7 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
         String cmd = webSocketDTO.getCmd();
         switch (cmd) {
             case PING_CMD:
-                log.debug("try to send ping ...");
+                log.info("try to send ping ...");
                 ctx.channel().writeAndFlush(new TextWebSocketFrame(PONG_STRING));
                 break;
             default:

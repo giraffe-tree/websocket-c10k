@@ -1,7 +1,7 @@
-package me.giraffetree.websocket.c10k.websocket.base.impl;
+package me.giraffetree.websocket.c10k.websocket.impl;
 
 import lombok.Data;
-import me.giraffetree.websocket.c10k.websocket.base.IExpired;
+import me.giraffetree.websocket.c10k.base.IExpired;
 import org.springframework.web.socket.WebSocketSession;
 
 /**

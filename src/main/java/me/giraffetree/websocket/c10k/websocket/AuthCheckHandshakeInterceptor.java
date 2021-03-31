@@ -2,7 +2,6 @@ package me.giraffetree.websocket.c10k.websocket;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import me.giraffetree.websocket.c10k.websocket.base.IDeviceManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;

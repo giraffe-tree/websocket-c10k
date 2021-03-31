@@ -1,8 +1,8 @@
-package me.giraffetree.websocket.c10k.websocket.base.impl;
+package me.giraffetree.websocket.c10k.websocket.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import me.giraffetree.websocket.c10k.websocket.base.IConnectionManager;
-import me.giraffetree.websocket.c10k.websocket.base.IDeviceManager;
+import me.giraffetree.websocket.c10k.base.IConnectionManager;
+import me.giraffetree.websocket.c10k.websocket.IDeviceManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

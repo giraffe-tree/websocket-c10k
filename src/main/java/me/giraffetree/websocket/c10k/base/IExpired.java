@@ -1,4 +1,4 @@
-package me.giraffetree.websocket.c10k.websocket.base;
+package me.giraffetree.websocket.c10k.base;
 
 /**
  * 用于检查该对象是否过期
