@@ -2,10 +2,11 @@ package me.giraffetree.websocket.c10k.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.ImmediateEventExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,13 +37,14 @@ public class WebsocketServer {
     private String path = "/websocket/handshake/";
 
     public void start(final int port) throws Exception {
-        NioEventLoopGroup boosGroup = new NioEventLoopGroup(1);
+        ChannelGroup channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
+        NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(boosGroup, workerGroup)
+            bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new WebsocketServerInitializer(path));
+                    .childHandler(new WebsocketServerInitializer(channelGroup, path));
             bootstrap.bind(port).addListener(
                     (ChannelFutureListener) future -> {
                         if (future.isSuccess()) {
@@ -52,7 +54,7 @@ public class WebsocketServer {
                         }
                     }).channel().closeFuture().sync();
         } finally {
-            boosGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
     }

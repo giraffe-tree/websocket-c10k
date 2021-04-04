@@ -1,5 +1,15 @@
 # websocket 百万连接及心跳管理
 
+* [websocket 百万连接及心跳管理](#websocket-百万连接及心跳管理)
+  * [概述](#概述)
+    * [场景与模型](#场景与模型)
+    * [判断指标](#判断指标)
+    * [roadmap](#roadmap)
+  * [如何使用](#如何使用)
+    * [如何优化系统性能](#如何优化系统性能)
+    * [实际测试结果图](#实际测试结果图)
+  * [常用工具](#常用工具)
+
 ## 概述
 
 ### 场景与模型
@@ -24,13 +34,6 @@
 4. 单机 1000w tcp 连接
 5. 单机 1000w websocket 长连接
 
-### 实际测试结果图
-
-- 连接数 
-    - 4核16G的server端, 建立 100w websocket 长连接
-
-![](./docs/img/websocket-c1000k.jpg)
-
 ## 如何使用
 
 1. 打包
@@ -52,7 +55,15 @@
     - `root soft nofile 1010000`
     - `root hard nofile 1010000`
 
-### 常用工具
+### 实际测试结果图
+
+- 连接数 
+    - 4核16G的server端, 建立 100w websocket 长连接
+
+![](./docs/img/websocket-c1000k.jpg)
+
+
+## 常用工具
 
 - dmesg | tail -n 20
     - dmesg用来显示内核环缓冲区（kernel-ring buffer）内容，内核将各种消息存放在这里。

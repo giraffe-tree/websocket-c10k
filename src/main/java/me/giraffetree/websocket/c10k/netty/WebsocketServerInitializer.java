@@ -2,6 +2,7 @@ package me.giraffetree.websocket.c10k.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -17,9 +18,11 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  */
 public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
+    private final ChannelGroup channelGroup;
     private final String path;
 
-    public WebsocketServerInitializer(String path) {
+    public WebsocketServerInitializer(ChannelGroup channelGroup, String path) {
+        this.channelGroup = channelGroup;
         this.path = path;
     }
 
@@ -40,7 +43,7 @@ public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel
                 .checkStartsWith(true)
                 .websocketPath(path)
                 .handshakeTimeoutMillis(2000L).build();
-        WebSocketServerProtocolHandler webSocketServerProtocolHandler = new WebSocketServerProtocolHandler(config);
+        WebSocketServerProtocolHandler webSocketServerProtocolHandler = new WebsocketHandler(config,channelGroup);
         pipeline.addLast(webSocketServerProtocolHandler);
         pipeline.addLast(new TextWebsocketFrameHandler());
     }
