@@ -2,9 +2,11 @@ package me.giraffetree.websocket.c10k.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +46,11 @@ public class WebsocketServer {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new WebsocketServerInitializer(channelGroup, path));
+                    .childHandler(new WebsocketServerInitializer(channelGroup, path))
+                    // child 就是 与客户端连接的 socketChannel 而不是 serverSocketChannel
+//                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(NioChannelOption.SO_KEEPALIVE, true)
+            ;
             bootstrap.bind(port).addListener(
                     (ChannelFutureListener) future -> {
                         if (future.isSuccess()) {

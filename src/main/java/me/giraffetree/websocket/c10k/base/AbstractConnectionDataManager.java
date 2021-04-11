@@ -22,11 +22,11 @@ public abstract class AbstractConnectionDataManager<K, V extends IExpired> imple
      * Invariant: (first == null && last == null) ||
      * (first.prev == null && first.item != null)
      */
-    private transient LinkedNode<K, V> first;
+    transient LinkedNode<K, V> first;
     /**
      * 链表表尾元素
      */
-    private transient LinkedNode<K, V> last;
+    transient LinkedNode<K, V> last;
     /**
      * 存储连接数据
      */

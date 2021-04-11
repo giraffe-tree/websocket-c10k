@@ -6,12 +6,16 @@ server:
     # 当调用Web服务的HTTP请求数达到tomcat的最大线程数时，还有新的HTTP请求到来，这时tomcat会将该请求放在等待队列中
     accept-count: 1000
     connection-timeout: 6000
-    threads:
+#    threads:
       # 2核服务器的 200 倍 (IO时间/CPU时间 + 1)
-      max: 400
-      min-spare: 100
+#      max: 400
+#      min-spare: 100
 
 ws:
   port: 8011
   path: /websocket/handshake/
 
+logging:
+  level:
+    me.giraffetree.websocket.c10k: debug
+    io.netty: debug
