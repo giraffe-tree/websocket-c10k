@@ -11,6 +11,8 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 
 /**
  * @author GiraffeTree
@@ -45,6 +47,7 @@ public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel
                 .handshakeTimeoutMillis(2000L).build();
         WebSocketServerProtocolHandler webSocketServerProtocolHandler = new WebsocketHandler(config,channelGroup);
         pipeline.addLast(webSocketServerProtocolHandler);
+        pipeline.addLast(new IdleStateHandler(8, 8, 8));
         pipeline.addLast(new TextWebsocketFrameHandler());
     }
 

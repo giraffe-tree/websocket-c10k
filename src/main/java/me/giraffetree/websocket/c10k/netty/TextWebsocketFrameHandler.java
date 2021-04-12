@@ -28,9 +28,7 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
-            ConnectionStatisticsManager.addConnection();
-        }
+
         super.userEventTriggered(ctx, evt);
     }
 
