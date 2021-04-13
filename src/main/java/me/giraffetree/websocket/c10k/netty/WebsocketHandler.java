@@ -9,6 +9,7 @@ import io.netty.util.Attribute;
 import io.netty.util.concurrent.FastThreadLocalThread;
 import io.netty.util.internal.InternalThreadLocalMap;
 import lombok.extern.slf4j.Slf4j;
+import me.giraffetree.websocket.c10k.base.ThreadLocalUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -23,19 +24,14 @@ import java.util.HashMap;
 @Slf4j
 public class WebsocketHandler extends WebSocketServerProtocolHandler {
 
-    private final ChannelGroup channelGroup;
 
-    public WebsocketHandler(WebSocketServerProtocolConfig serverConfig, ChannelGroup channelGroup) {
+    public WebsocketHandler(WebSocketServerProtocolConfig serverConfig) {
         super(serverConfig);
-        this.channelGroup = channelGroup;
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt instanceof ServerHandshakeStateEvent) {
-            String name = ((ServerHandshakeStateEvent) evt).name();
-            log.info("ServerHandshakeStateEvent - {}", name);
-        }
+
         if (evt instanceof HandshakeComplete) {
             Channel channel = ctx.channel();
             String requestUri = ((HandshakeComplete) evt).requestUri();
@@ -62,19 +58,11 @@ public class WebsocketHandler extends WebSocketServerProtocolHandler {
             }
             Attribute<String> attr = channel.attr(Constants.ATTRIBUTE_KEY_ID);
             attr.set(id);
-            channelGroup.add(channel);
-
-            FastThreadLocalThread fastThreadLocalThread = (FastThreadLocalThread) Thread.currentThread();
-            fastThreadLocalThread.setThreadLocalMap(InternalThreadLocalMap.get());
-            InternalThreadLocalMap internalThreadLocalMap = fastThreadLocalThread.threadLocalMap();
-            if (!internalThreadLocalMap.isIndexedVariableSet(31)) {
-                boolean success = internalThreadLocalMap.setIndexedVariable(31, new UnsafeConnectionManager());
-                log.debug("add connection manager success:{} thread:{}", success, Thread.currentThread().getId());
+            if (!ThreadLocalUtils.addConnection(id, channel)) {
+                ctx.close();
+            } else {
+                ConnectionStatisticsManager.addConnection();
             }
-            UnsafeConnectionManager manager = (UnsafeConnectionManager) internalThreadLocalMap.indexedVariable(31);
-            manager.addConnection(id, new ChannelConnectionInfo(id, channel));
-
-            log.info("add thread:{} id:{}", Thread.currentThread().getId(), id);
         } else {
             super.userEventTriggered(ctx, evt);
         }
@@ -90,7 +78,7 @@ public class WebsocketHandler extends WebSocketServerProtocolHandler {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Attribute<String> attr = ctx.channel().attr(Constants.ATTRIBUTE_KEY_ID);
         String id = attr.get();
-        log.error("cause - id:{} msg:{}",id, cause.getLocalizedMessage());
+        log.error("cause - id:{} msg:{}", id, cause.getLocalizedMessage());
         ctx.close();
     }
 }

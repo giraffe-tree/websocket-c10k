@@ -4,11 +4,12 @@ import com.alibaba.fastjson.JSON;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.Attribute;
 import io.netty.util.concurrent.FastThreadLocalThread;
 import io.netty.util.internal.InternalThreadLocalMap;
 import lombok.extern.slf4j.Slf4j;
+import me.giraffetree.websocket.c10k.base.ThreadLocalUtils;
 
 import java.io.IOException;
 
@@ -28,7 +29,12 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-
+        if (evt instanceof IdleStateEvent) {
+            Attribute<String> attr = ctx.channel().attr(Constants.ATTRIBUTE_KEY_ID);
+            String id = attr.get();
+            log.info("userEventTriggered - {} - try to close id:{}", evt, id);
+            ctx.close();
+        }
         super.userEventTriggered(ctx, evt);
     }
 
@@ -39,18 +45,11 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        FastThreadLocalThread thread = (FastThreadLocalThread) Thread.currentThread();
         Attribute<String> attr = ctx.channel().attr(Constants.ATTRIBUTE_KEY_ID);
         String id = attr.get();
-        log.debug("get ping thread:{} id:{}", thread.getId(), id);
-        InternalThreadLocalMap internalThreadLocalMap = thread.threadLocalMap();
-        if (internalThreadLocalMap.isIndexedVariableSet(31)) {
-            UnsafeConnectionManager manager = (UnsafeConnectionManager) internalThreadLocalMap.indexedVariable(31);
-            log.info("delete connection - id:{}", id);
-            manager.deleteConnection(id);
-        } else {
-            log.warn("not found threadLocal - thread:{}", thread.getId());
-        }
+        log.debug("get handler removed id:{}", id);
+
+        ThreadLocalUtils.removeConnection(id);
         ConnectionStatisticsManager.removeConnection();
     }
 
@@ -61,19 +60,11 @@ public class TextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextW
         String cmd = webSocketDTO.getCmd();
         switch (cmd) {
             case PING_CMD:
-                FastThreadLocalThread thread = (FastThreadLocalThread) Thread.currentThread();
                 Attribute<String> attr = ctx.channel().attr(Constants.ATTRIBUTE_KEY_ID);
                 String id = attr.get();
-                log.debug("get ping thread:{} id:{}", thread.getId(), id);
-                InternalThreadLocalMap internalThreadLocalMap = thread.threadLocalMap();
-                if (internalThreadLocalMap.isIndexedVariableSet(31)) {
-                    UnsafeConnectionManager manager = (UnsafeConnectionManager) internalThreadLocalMap.indexedVariable(31);
-                    ChannelConnectionInfo connection = manager.getConnection(id);
-                    connection.resetExpired();
-                    manager.updateConnection(id, connection);
-                    ctx.channel().writeAndFlush(new TextWebSocketFrame(PONG_STRING));
-                } else {
-                    log.warn("not found threadLocal - thread:{}", thread.getId());
+                log.debug("get ping  id:{}", id);
+
+                if (!ThreadLocalUtils.flushConnection(id)) {
                     ctx.close();
                 }
                 break;

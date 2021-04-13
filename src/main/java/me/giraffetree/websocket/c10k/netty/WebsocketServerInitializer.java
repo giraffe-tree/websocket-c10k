@@ -20,11 +20,9 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
  */
 public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel> {
 
-    private final ChannelGroup channelGroup;
     private final String path;
 
-    public WebsocketServerInitializer(ChannelGroup channelGroup, String path) {
-        this.channelGroup = channelGroup;
+    public WebsocketServerInitializer( String path) {
         this.path = path;
     }
 
@@ -45,9 +43,9 @@ public class WebsocketServerInitializer extends ChannelInitializer<SocketChannel
                 .checkStartsWith(true)
                 .websocketPath(path)
                 .handshakeTimeoutMillis(2000L).build();
-        WebSocketServerProtocolHandler webSocketServerProtocolHandler = new WebsocketHandler(config,channelGroup);
+        WebSocketServerProtocolHandler webSocketServerProtocolHandler = new WebsocketHandler(config);
         pipeline.addLast(webSocketServerProtocolHandler);
-        pipeline.addLast(new IdleStateHandler(8, 8, 8));
+        pipeline.addLast(new IdleStateHandler(15,0,0));
         pipeline.addLast(new TextWebsocketFrameHandler());
     }
 

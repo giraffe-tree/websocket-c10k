@@ -39,14 +39,13 @@ public class WebsocketServer {
     private String path = "/websocket/handshake/";
 
     public void start(final int port) throws Exception {
-        ChannelGroup channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
         NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new WebsocketServerInitializer(channelGroup, path))
+                    .childHandler(new WebsocketServerInitializer(path))
                     // child 就是 与客户端连接的 socketChannel 而不是 serverSocketChannel
 //                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(NioChannelOption.SO_KEEPALIVE, true)
